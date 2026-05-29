@@ -503,6 +503,24 @@ Admin should immediately change/use a strong password in production by updating 
 
 ---
 
+## Change Admin Password
+
+Admin can change password from:
+
+```txt
+Admin Dashboard > Settings > Change Admin Password
+```
+
+The system asks for current password and new password. Password is saved as bcrypt hash in MongoDB.
+
+If admin forgets password, reset it from local terminal by updating `.env.local` and running:
+
+```bash
+npm run seed:admin
+```
+
+Make sure `.env.local` uses the same production `MONGODB_URI` if you want to reset the live website admin password.
+
 ## Admin Workflow
 
 1. Login to admin dashboard.
