@@ -1,0 +1,9 @@
+node_modules
+.next
+.env
+.env.local
+.DS_Store
+public/uploads/payment-proofs/*
+public/uploads/qr/*
+!public/uploads/payment-proofs/.gitkeep
+!public/uploads/qr/.gitkeep
