@@ -1,48 +1,198 @@
 # SVN Infra & Solar Service Pvt Ltd - Student Registration Portal
 
-A production-ready full-stack Student Registration Portal with Razorpay QR payment proof flow, MongoDB Atlas storage, JWT admin authentication, dashboard analytics, student/payment management, settings management, QR upload and XLSX export.
+A production-ready full-stack **Student Registration Portal with Admin Dashboard** for **SVN Infra & Solar Service Pvt Ltd**.
+
+Live website example:
+
+```txt
+https://svn-student-portal-noln.vercel.app/
+```
+
+This portal supports student registration, automatic Razorpay payments, manual QR payment verification, admin-controlled fee/QR settings, Excel export, email notifications, and student payment status tracking.
+
+---
 
 ## Features
 
-- Modern responsive public landing page
-- Student registration form with validation and conditional fields
-- Configurable registration fee from admin panel
-- Dynamic Razorpay QR image upload/preview/activation
-- Automatic Razorpay Checkout order creation and server-side signature verification
-- Payment ID
-- Razorpay Order ID, order ID and timestamp storage
-- Automatic registration ID generation, e.g. `SVN2026-0001`
-- Secure admin login with bcrypt password hash + JWT httpOnly cookie
-- Dashboard analytics: total registrations, verified payments, pending, rejected, today's registrations
-- Student search, filtering, edit, delete and payment proof view
-- Payment verification/rejection workflow
-- Excel export for all/filtered students
-- Certificate verification button in navbar/footer with configurable redirect URL
-- MongoDB Atlas schemas for Student, Admin and Settings
-- Basic rate limiting, upload restrictions and server-side validation
+### Public Website
+
+- Modern responsive home page
+- Student registration form
+- Conditional fields for `Others`
+- Registration fee display
+- Certificate verification redirect button
+- Contact section
+- Mobile responsive UI
+
+### Student Registration
+
+Required student fields:
+
+- Full Name
+- Father Name
+- Date of Birth
+- Gender
+- Mobile Number
+- Alternate Mobile
+- Email
+- College Name
+- College Registration Number
+- Branch
+- Session
+
+Automatic registration ID format:
+
+```txt
+SVN2026-0001
+```
+
+### Payment System
+
+The portal supports two payment methods.
+
+#### 1. Razorpay Automatic Payment
+
+- Student fills form
+- Student selects Razorpay
+- Razorpay Checkout opens
+- Student pays online
+- Server verifies Razorpay signature
+- Registration is created as `Verified`
+- Student receives email confirmation
+
+#### 2. Manual QR Payment
+
+- Student selects Manual QR
+- Student scans admin-uploaded QR
+- Student enters UTR number / transaction ID
+- Student uploads screenshot or PDF proof
+- Registration is created as `Pending`
+- Admin verifies or rejects payment
+- Student receives email notification
+
+### Admin Dashboard
+
+Admin can:
+
+- View dashboard analytics
+- View all registrations
+- Search students
+- Filter by payment status
+- Edit student details
+- Delete student records
+- View payment screenshot/proof
+- Verify manual payments
+- Reject manual payments with reason
+- Export student data to Excel
+- Change registration fee
+- Upload/change QR code
+- Enable/disable QR code
+- Enable/disable registration form
+- Change certificate verification URL
+
+### Student Status Tracking
+
+Students can check their payment/registration status at:
+
+```txt
+/status
+```
+
+Required:
+
+- Registration ID
+- Mobile number
+
+Statuses:
+
+```txt
+Pending
+Verified
+Rejected
+```
+
+### Email Notifications
+
+Email notification is sent for:
+
+- Manual payment submitted: pending verification email
+- Razorpay payment successful: payment success email
+- Admin verifies manual payment: payment success email
+- Admin rejects manual payment: rejection email with reason
+
+Example success message:
+
+```txt
+Your payment is successful and your registration has been confirmed.
+Registration ID: SVN2026-0001
+```
+
+---
 
 ## Tech Stack
 
-- **Frontend:** Next.js App Router, React, Tailwind CSS, Framer Motion, Lucide Icons, react-hot-toast
-- **Backend:** Next.js API Routes
-- **Database:** MongoDB Atlas + Mongoose
-- **Auth:** JWT + bcryptjs
-- **File Upload:** Next.js FormData file handling to `public/uploads` by default
-- **Excel:** `xlsx`
+### Frontend
+
+- Next.js App Router
+- React
+- Tailwind CSS
+- Framer Motion
+- Lucide React Icons
+- React Hot Toast
+
+### Backend
+
+- Next.js API Routes
+- Node.js
+- MongoDB Atlas
+- Mongoose
+
+### Authentication
+
+- JWT
+- bcryptjs
+- HTTP-only cookie authentication
+
+### Payments
+
+- Razorpay Checkout
+- Razorpay server-side signature verification
+- Manual QR payment fallback
+
+### File Upload
+
+- Cloudinary for production uploads
+- Local upload fallback for local/VPS use
+
+### Excel Export
+
+- xlsx package
+
+### Email
+
+- Nodemailer SMTP
+
+---
 
 ## Project Structure
 
 ```txt
 svn-student-portal/
-├─ public/uploads/
-│  ├─ payment-proofs/
-│  └─ qr/
-├─ scripts/seed-admin.mjs
+├─ public/
+│  └─ uploads/
+│     ├─ payment-proofs/
+│     └─ qr/
+├─ scripts/
+│  └─ seed-admin.mjs
 ├─ src/
 │  ├─ app/
 │  │  ├─ api/
 │  │  │  ├─ register/route.ts
 │  │  │  ├─ settings/route.ts
+│  │  │  ├─ status/route.ts
+│  │  │  ├─ payment/
+│  │  │  │  ├─ create-order/route.ts
+│  │  │  │  └─ verify/route.ts
 │  │  │  └─ admin/
 │  │  │     ├─ analytics/route.ts
 │  │  │     ├─ export/route.ts
@@ -51,263 +201,198 @@ svn-student-portal/
 │  │  │     ├─ me/route.ts
 │  │  │     ├─ payments/[id]/route.ts
 │  │  │     ├─ settings/route.ts
+│  │  │     ├─ students/route.ts
 │  │  │     └─ students/[id]/route.ts
-│  │  ├─ admin/login/page.tsx
-│  │  ├─ admin/dashboard/page.tsx
+│  │  ├─ admin/
+│  │  │  ├─ login/page.tsx
+│  │  │  └─ dashboard/page.tsx
 │  │  ├─ register/page.tsx
+│  │  ├─ status/page.tsx
 │  │  ├─ page.tsx
 │  │  ├─ layout.tsx
 │  │  └─ globals.css
 │  ├─ components/
+│  │  ├─ Footer.tsx
+│  │  ├─ Navbar.tsx
+│  │  └─ StatCard.tsx
 │  ├─ lib/
+│  │  ├─ api.ts
+│  │  ├─ auth.ts
+│  │  ├─ db.ts
+│  │  ├─ email.ts
+│  │  ├─ file.ts
+│  │  ├─ rateLimit.ts
+│  │  ├─ registrationId.ts
+│  │  ├─ settings.ts
+│  │  └─ validation.ts
 │  └─ models/
+│     ├─ Admin.ts
+│     ├─ Settings.ts
+│     └─ Student.ts
 ├─ .env.example
+├─ .gitignore
+├─ README.md
 ├─ next.config.ts
+├─ package.json
+├─ postcss.config.js
 ├─ tailwind.config.ts
-└─ package.json
+└─ tsconfig.json
 ```
+
+---
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local`:
+Create `.env.local` in the project root:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Set values:
+Example `.env.local`:
 
 ```env
 MONGODB_URI=mongodb+srv://USER:PASSWORD@cluster.mongodb.net/svn_student_portal?retryWrites=true&w=majority
-JWT_SECRET=use-a-long-random-secret-at-least-64-characters
+
+JWT_SECRET=replace-with-a-long-secure-secret
 JWT_EXPIRES_IN=7d
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=ChangeMe@12345
-CERTIFICATE_VERIFY_URL=https://your-live-certificate-site.com/verify
-MAX_UPLOAD_MB=3
 
-# Razorpay automatic checkout
 RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
 RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
+
+CERTIFICATE_VERIFY_URL=https://example.com/verify
+MAX_UPLOAD_MB=3
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
+SMTP_FROM=SVN Infra & Solar Service Pvt Ltd <your_email@gmail.com>
 ```
 
-Generate a strong JWT secret:
+Generate JWT secret:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
-## Local Setup
+---
 
-```bash
-npm install
-cp .env.example .env.local
-# edit .env.local
-npm run seed:admin
-npm run dev
+## MongoDB Atlas Setup
+
+1. Create MongoDB Atlas account.
+2. Create a cluster.
+3. Create database user from:
+
+```txt
+Database Access > Add New Database User
 ```
 
-Open:
+4. Give permission:
 
-- Website: `http://localhost:3000`
-- Registration: `http://localhost:3000/register`
-- Admin Login: `http://localhost:3000/admin/login`
-
-Default admin is created from `ADMIN_USERNAME` and `ADMIN_PASSWORD` when you run `npm run seed:admin`.
-
-## Admin Workflow
-
-1. Login to `/admin/login`.
-2. Go to **Settings**:
-   - Set registration fee
-   - Upload Razorpay QR image
-   - Enable/disable registration form
-   - Activate/deactivate QR code
-   - Set certificate verification URL
-3. Go to **Students & Payments**:
-   - Search/filter students
-   - View uploaded payment proof
-   - Verify/reject payment
-   - Edit/delete records
-   - Export XLSX
-
-## Registration Payment Flow
-
-### Automatic Razorpay Checkout Flow
-
-1. Student fills the registration form.
-2. Frontend calls `POST /api/payment/create-order`.
-3. Server reads the current registration fee from Settings and creates a Razorpay order.
-4. Razorpay Checkout opens on the frontend.
-5. After successful payment, frontend sends Razorpay payment response to `POST /api/payment/verify`.
-6. Server verifies `razorpay_order_id | razorpay_payment_id` using HMAC SHA256 and `RAZORPAY_KEY_SECRET`.
-7. If valid, student registration is created with `paymentStatus: Verified`.
-8. A unique registration ID is generated automatically.
-
-### Manual QR Fallback
-
-The project still contains QR upload/settings and `/api/register` manual proof API if you want to keep offline/manual QR verification as a backup.
-
-## Database Schemas
-
-### Student
-
-- registrationId
-- fullName
-- fatherName
-- dob
-- gender
-- mobile
-- alternateMobile
-- email
-- collegeName
-- customCollegeName
-- registrationNumber
-- branch
-- customBranch
-- session
-- customSession
-- paymentStatus
-- paymentId
-- paymentScreenshot
-- paymentTimestamp
-- createdAt / updatedAt
-
-### Admin
-
-- username
-- passwordHash
-- role
-
-### Settings
-
-- registrationFee
-- qrCodeImage
-- certificateVerifyUrl
-- registrationEnabled
-- qrEnabled
-
-## API Summary
-
-### Public
-
-- `GET /api/settings` - public settings for fee, QR and verify URL
-- `POST /api/register` - create student registration with optional payment proof
-- `POST /api/payment/create-order` - create Razorpay Checkout order
-- `POST /api/payment/verify` - verify Razorpay signature and create verified registration
-
-### Admin
-
-- `POST /api/admin/login`
-- `POST /api/admin/logout`
-- `GET /api/admin/me`
-- `GET /api/admin/analytics`
-- `GET /api/admin/students?q=&status=&page=&limit=`
-- `GET /api/admin/students/:id`
-- `PUT /api/admin/students/:id`
-- `DELETE /api/admin/students/:id`
-- `PATCH /api/admin/payments/:id`
-- `GET /api/admin/settings`
-- `PUT /api/admin/settings`
-- `GET /api/admin/export?q=&status=`
-
-## Production Notes
-
-### File Uploads
-
-This implementation saves uploaded files under `public/uploads`. This is fine for VPS deployments with persistent disk. On serverless platforms such as Vercel, local uploaded files are not persistent. For production serverless deployment, replace `src/lib/file.ts` with Cloudinary/S3/R2 upload logic and store the returned secure URL in MongoDB.
-
-### Security Checklist
-
-- Use HTTPS in production.
-- Use a long `JWT_SECRET`.
-- Change default admin password immediately.
-- Restrict MongoDB Atlas network access where possible.
-- Use Cloudinary/S3 for production uploads.
-- Add CAPTCHA for high-traffic public registration if needed.
-- Place the app behind a WAF/CDN for advanced rate limiting.
-- Periodically export and back up MongoDB data.
-
-## Deployment Guide
-
-### Option A: VPS / Node Server
-
-1. Install Node.js LTS and PM2.
-2. Clone/copy project.
-3. Create `.env.local` or system environment variables.
-4. Install dependencies and build:
-
-```bash
-npm ci
-npm run seed:admin
-npm run build
-pm2 start npm --name svn-student-portal -- start
+```txt
+Read and write to any database
 ```
 
-5. Configure Nginx reverse proxy to `localhost:3000`.
-6. Enable SSL with Certbot.
-7. Ensure `public/uploads` is backed up and writable.
+5. Allow network access:
 
-### Option B: Vercel
+```txt
+Network Access > Add IP Address > 0.0.0.0/0
+```
 
-1. Push project to GitHub.
-2. Import repository in Vercel.
-3. Add all environment variables in Vercel dashboard.
-4. Deploy.
-5. Run `npm run seed:admin` locally with production `MONGODB_URI`, or create a temporary protected seed endpoint.
-6. Replace local uploads with Cloudinary/S3 because Vercel filesystem is ephemeral.
+6. Copy Node.js driver connection string and place in `.env.local`:
 
-## Customization
+```env
+MONGODB_URI=mongodb+srv://USER:PASSWORD@cluster.mongodb.net/svn_student_portal?retryWrites=true&w=majority
+```
 
-- Company/contact information: update `src/components/Footer.tsx` and `src/app/page.tsx`.
-- Dropdown values: update `src/app/register/page.tsx`.
-- Registration ID format: update `src/lib/registrationId.ts`.
-- Validation: update `src/lib/validation.ts`.
+If password contains special characters, URL encode it.
 
-## License
+Example:
 
-Private project for SVN Infra & Solar Service Pvt Ltd.
+```txt
+Admin@123 -> Admin%40123
+```
 
+---
 
-## Razorpay Automatic Payment Setup
+## Razorpay Setup
 
-1. Create a Razorpay account and complete required KYC/business activation.
-2. Go to Razorpay Dashboard > Account & Settings > API Keys.
-3. Generate keys for test or live mode.
-4. Add keys to `.env.local`:
+1. Login to Razorpay Dashboard.
+2. Go to:
+
+```txt
+Account & Settings > API Keys
+```
+
+3. Generate test or live keys.
+4. Add to `.env.local` and Vercel:
 
 ```env
 RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
 RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-5. Restart the Next.js server after changing environment variables:
-
-```bash
-npm run dev
-```
-
-For production, replace test keys with live keys:
+For production use live keys:
 
 ```env
 RAZORPAY_KEY_ID=rzp_live_xxxxxxxxxxxxx
 RAZORPAY_KEY_SECRET=live_secret_here
 ```
 
-Never expose `RAZORPAY_KEY_SECRET` in frontend code. This project only returns `RAZORPAY_KEY_ID` to the browser and verifies the signature securely on the backend.
+Never expose `RAZORPAY_KEY_SECRET` in frontend code.
 
+---
 
-## Email Notification Setup
+## Cloudinary Setup
 
-The portal can send automatic emails to students for payment/registration status:
+Cloudinary is recommended for Vercel because Vercel filesystem is temporary.
 
-- Manual QR submitted: pending verification email
-- Admin verifies payment: payment successful email with registration ID
-- Admin rejects payment: rejected email with reason
-- Razorpay successful payment: instant payment successful email with registration ID
+1. Create account at:
 
-Add SMTP variables locally and in Vercel:
+```txt
+https://cloudinary.com
+```
+
+2. Copy:
+
+```txt
+Cloud Name
+API Key
+API Secret
+```
+
+3. Add to `.env.local` and Vercel:
+
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+Used for:
+
+- Manual payment screenshot upload
+- Payment proof PDF/image upload
+- Admin QR image upload
+
+---
+
+## Email SMTP Setup
+
+For Gmail:
+
+1. Enable 2-Step Verification in Google Account.
+2. Create Gmail App Password.
+3. Add SMTP values:
 
 ```env
 SMTP_HOST=smtp.gmail.com
@@ -318,11 +403,174 @@ SMTP_PASS=your_gmail_app_password
 SMTP_FROM=SVN Infra & Solar Service Pvt Ltd <your_email@gmail.com>
 ```
 
-For Gmail, create an App Password from Google Account > Security > 2-Step Verification > App passwords. Do not use your normal Gmail password.
+Do not use your normal Gmail password. Use Gmail App Password only.
 
-## Student Status Tracking
+---
 
-Students can check payment/registration status from:
+## Local Installation
+
+```bash
+cd svn-student-portal
+npm install
+```
+
+Test MongoDB connection:
+
+```bash
+node test-db.mjs
+```
+
+Expected:
+
+```txt
+Mongo URI exists: true
+MongoDB connected successfully
+```
+
+Seed admin user:
+
+```bash
+npm run seed:admin
+```
+
+Expected:
+
+```txt
+Admin ready: admin
+```
+
+Run development server:
+
+```bash
+npm run dev
+```
+
+Open:
+
+```txt
+http://localhost:3000
+http://localhost:3000/register
+http://localhost:3000/status
+http://localhost:3000/admin/login
+```
+
+---
+
+## Build Locally
+
+Stop dev server first:
+
+```txt
+Ctrl + C
+```
+
+Remove old build cache on Windows PowerShell:
+
+```powershell
+Remove-Item -Recurse -Force .next
+```
+
+Build:
+
+```bash
+npm run build
+```
+
+Start production server locally:
+
+```bash
+npm run start
+```
+
+---
+
+## Admin Login
+
+After seeding admin:
+
+```txt
+/admin/login
+```
+
+Use:
+
+```txt
+Username: value of ADMIN_USERNAME
+Password: value of ADMIN_PASSWORD
+```
+
+Admin should immediately change/use a strong password in production by updating env and running seed again.
+
+---
+
+## Admin Workflow
+
+1. Login to admin dashboard.
+2. Go to Settings.
+3. Configure:
+
+```txt
+Registration Fee
+QR Code Image
+QR Active/Inactive
+Registration Active/Inactive
+Certificate Verify URL
+```
+
+4. Go to Students & Payments.
+5. Review manual payments.
+6. Verify or reject payments.
+7. Export Excel if needed.
+
+---
+
+## Student Payment Flow
+
+### Razorpay Auto Flow
+
+```txt
+Student fills form
+↓
+Selects Razorpay
+↓
+Razorpay Checkout opens
+↓
+Payment successful
+↓
+Server verifies signature
+↓
+Registration created as Verified
+↓
+Email sent to student
+```
+
+### Manual QR Flow
+
+```txt
+Student fills form
+↓
+Selects Manual QR
+↓
+Scans QR uploaded by admin
+↓
+Enters UTR / transaction ID
+↓
+Uploads screenshot/PDF
+↓
+Registration created as Pending
+↓
+Email sent: pending verification
+↓
+Admin verifies/rejects
+↓
+Email sent to student
+```
+
+---
+
+## Student Status Check
+
+Students can check payment approval status at:
 
 ```txt
 /status
@@ -330,7 +578,213 @@ Students can check payment/registration status from:
 
 They need:
 
-- Registration ID
-- Mobile number
+```txt
+Registration ID
+Mobile Number
+```
 
-The status page shows Pending, Verified, or Rejected with payment mode and payment ID/UTR.
+Status result can be:
+
+```txt
+Pending - Waiting for admin verification
+Verified - Payment successful and registration confirmed
+Rejected - Payment proof rejected
+```
+
+---
+
+## Excel Export
+
+Admin can export Excel from dashboard.
+
+Export includes:
+
+- Registration ID
+- Student details
+- College details
+- Branch/session
+- Payment status
+- Payment mode
+- Payment ID
+- UTR number
+- Razorpay order ID
+- Payment timestamp
+- Registration timestamp
+
+---
+
+## API Summary
+
+### Public APIs
+
+```txt
+GET  /api/settings
+POST /api/register
+POST /api/status
+POST /api/payment/create-order
+POST /api/payment/verify
+```
+
+### Admin APIs
+
+```txt
+POST   /api/admin/login
+POST   /api/admin/logout
+GET    /api/admin/me
+GET    /api/admin/analytics
+GET    /api/admin/students
+GET    /api/admin/students/:id
+PUT    /api/admin/students/:id
+DELETE /api/admin/students/:id
+PATCH  /api/admin/payments/:id
+GET    /api/admin/settings
+PUT    /api/admin/settings
+GET    /api/admin/export
+```
+
+---
+
+## Push to Same GitHub Repo
+
+If this is already a git repo:
+
+```bash
+git status
+git add .
+git commit -m "Update payment status tracking and email notifications"
+git push origin main
+```
+
+If you see:
+
+```txt
+fatal: not a git repository
+```
+
+Run:
+
+```bash
+cd D:\Desktop\svn-student-portal
+git init
+git remote add origin https://github.com/Sushantku1099/svn-student-portal.git
+git branch -M main
+git add .
+git commit -m "Update payment status tracking and email notifications"
+git push origin main --force
+```
+
+Before pushing, make sure `.env.local` is not committed.
+
+Check `.gitignore` contains:
+
+```gitignore
+.env
+.env.local
+node_modules
+.next
+```
+
+---
+
+## Deploy on Vercel
+
+1. Go to:
+
+```txt
+https://vercel.com
+```
+
+2. Import GitHub repository:
+
+```txt
+Sushantku1099/svn-student-portal
+```
+
+3. Framework:
+
+```txt
+Next.js
+```
+
+4. Build command:
+
+```txt
+npm run build
+```
+
+5. Add environment variables in:
+
+```txt
+Vercel Project > Settings > Environment Variables
+```
+
+Required production variables:
+
+```env
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_long_random_secret
+JWT_EXPIRES_IN=7d
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_admin_password
+RAZORPAY_KEY_ID=your_razorpay_key
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+CERTIFICATE_VERIFY_URL=https://your-certificate-verification-site.com
+MAX_UPLOAD_MB=3
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
+SMTP_FROM=SVN Infra & Solar Service Pvt Ltd <your_email@gmail.com>
+```
+
+6. Redeploy:
+
+```txt
+Deployments > Redeploy > Redeploy without build cache
+```
+
+---
+
+## Production Checklist
+
+```txt
+[ ] npm install completed
+[ ] .env.local configured locally
+[ ] MongoDB connection tested
+[ ] Admin seeded
+[ ] Razorpay keys added
+[ ] Cloudinary configured
+[ ] SMTP email configured
+[ ] Manual QR upload tested
+[ ] Razorpay payment tested
+[ ] Status page tested
+[ ] Email notifications tested
+[ ] npm run build successful
+[ ] Code pushed to GitHub
+[ ] Vercel environment variables added
+[ ] Vercel redeployed without cache
+[ ] Live website tested
+```
+
+---
+
+## Important Security Notes
+
+- Never commit `.env.local`.
+- Never expose `RAZORPAY_KEY_SECRET` in frontend.
+- Use strong `JWT_SECRET`.
+- Use a strong admin password.
+- Use MongoDB Atlas Network Access carefully.
+- For easiest Vercel deployment, Atlas Network Access can use `0.0.0.0/0`, but production security should be reviewed.
+- Use Cloudinary/S3/R2 for uploaded files in production.
+- Use Gmail App Password or a dedicated SMTP provider for emails.
+
+---
+
+## License
+
+Private project for **SVN Infra & Solar Service Pvt Ltd**.
